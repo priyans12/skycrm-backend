@@ -1,22 +1,30 @@
 const asyncHandler = require('express-async-handler');
+const SupportRequest = require('../models/SupportRequest');
 
-// @desc    Handle support form submission
+// @desc    Submit a public support request
 // @route   POST /api/support/submit
 // @access  Public
 const submitSupportRequest = asyncHandler(async (req, res) => {
-  const { name, email, message } = req.body;
-
-  if (!name || !email || !message) {
+  const { name, email, subject, message } = req.body;
+  if (!name || !email || !subject || !message) {
     res.status(400);
     throw new Error('All fields are required');
   }
 
-  // Example logic: Log the data or save to DB (add DB logic here)
-  console.log('Support Request:', { name, email, message });
+  // Now SupportRequest.create exists and works
+  const request = await SupportRequest.create({ name, email, subject, message });
+  res.status(201).json(request);
+});
 
-  res.status(200).json({ message: 'Support request submitted successfully' });
+// @desc    Get all public support requests
+// @route   GET /api/support
+// @access  Public
+const getSupportRequests = asyncHandler(async (req, res) => {
+  const requests = await SupportRequest.find().sort({ createdAt: -1 });
+  res.json(requests);
 });
 
 module.exports = {
   submitSupportRequest,
+  getSupportRequests,
 };
